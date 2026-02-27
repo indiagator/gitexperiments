@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git — The Essential Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f12;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #f0a500;
+    --accent2: #e05c5c;
+    --accent3: #5ce0b0;
+    --text: #e8eaf0;
+    --text-muted: #7a8099;
+    --code-bg: #0a0c10;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 8vw;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 50%, rgba(240,165,0,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(92,224,176,0.05) 0%, transparent 60%);
+  }
+
+  .hero-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 10vw, 9rem);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    max-width: 520px;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .stat-item { border-left: 2px solid var(--accent); padding-left: 1rem; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.1em; }
+
+  .git-graphic {
+    position: absolute;
+    right: 6vw;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: fadeIn 1.2s 1s forwards;
+  }
+
+  /* GRAPH */
+  .commit-graph { width: 340px; height: 340px; }
+
+  /* SECTIONS */
+  .section {
+    padding: 6rem 8vw;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--accent3);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    margin-bottom: 3rem;
+    line-height: 1.1;
+  }
+
+  /* CONCEPT CARDS */
+  .concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5px;
+    background: var(--border);
+    border: 1.5px solid var(--border);
+  }
+
+  .concept-card {
+    background: var(--surface);
+    padding: 2rem;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .concept-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s;
+  }
+
+  .concept-card:hover { background: var(--surface2); }
+  .concept-card:hover::before { height: 100%; }
+
+  .concept-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .concept-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+
+  .concept-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* WORKFLOW DIAGRAM */
+  .workflow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin: 3rem 0;
+    overflow-x: auto;
+  }
+
+  .workflow-step {
+    flex: 1;
+    min-width: 160px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    text-align: center;
+  }
+
+  .workflow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 1.2rem;
+    z-index: 2;
+    background: var(--bg);
+    padding: 0 2px;
+  }
+
+  .workflow-step .step-area {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  .workflow-step .step-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  .workflow-step .step-cmd {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--code-bg);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 0.4rem;
+  }
+
+  /* COMMANDS TABLE */
+  .commands-section { padding: 6rem 8vw; border-top: 1px solid var(--border); }
+
+  .cmd-category {
+    margin-bottom: 3.5rem;
+  }
+
+  .cmd-category h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .cmd-category h3::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cmd-list { display: flex; flex-direction: column; gap: 2px; }
+
+  .cmd-row {
+    display: grid;
+    grid-template-columns: minmax(200px, 320px) 1fr;
+    gap: 0;
+    background: var(--border);
+    overflow: hidden;
+    border-radius: 2px;
+    transition: transform 0.15s;
+  }
+
+  .cmd-row:hover { transform: translateX(4px); }
+
+  .cmd-code {
+    background: var(--code-bg);
+    padding: 0.85rem 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cmd-code .prompt { color: var(--text-muted); user-select: none; }
+
+  .cmd-desc {
+    background: var(--surface);
+    padding: 0.85rem 1.25rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+  }
+
+  .cmd-row:hover .cmd-desc { color: var(--text); background: var(--surface2); }
+
+  /* BRANCHING VISUAL */
+  .branch-section {
+    padding: 6rem 8vw;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);
+  }
+
+  .branch-diagram {
+    margin: 3rem auto;
+    max-width: 700px;
+  }
+
+  /* TIPS */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    background: var(--surface);
+    position: relative;
+  }
+
+  .tip-card.gold { border-color: rgba(240,165,0,0.4); }
+  .tip-card.red { border-color: rgba(224,92,92,0.4); }
+  .tip-card.green { border-color: rgba(92,224,176,0.4); }
+
+  .tip-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card.gold .tip-label { color: var(--accent); }
+  .tip-card.red .tip-label { color: var(--accent2); }
+  .tip-card.green .tip-label { color: var(--accent3); }
+
+  .tip-card p { font-size: 0.9rem; color: var(--text-muted); }
+  .tip-card code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    background: var(--code-bg);
+    padding: 0.1em 0.4em;
+    border-radius: 3px;
+    color: var(--accent3);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 8vw;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  footer p { font-size: 0.8rem; color: var(--text-muted); }
+  footer .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 1.2rem 8vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    background: rgba(13,15,18,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s;
+  }
+
+  nav.scrolled { border-color: var(--border); }
+
+  .nav-brand {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: var(--code-bg);
+    padding: 0.15em 0.45em;
+    border-radius: 3px;
+    color: var(--accent3);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  .animate-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .animate-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .git-graphic { display: none; }
+    .cmd-row { grid-template-columns: 1fr; }
+    .workflow { flex-direction: column; }
+    .workflow-step:not(:last-child)::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -14px; transform: translateX(-50%); }
+    .hero-stats { flex-wrap: wrap; gap: 1.5rem; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <span class="nav-brand">$ git --guide</span>
+  <ul class="nav-links">
+    <li><a href="#concepts">Concepts</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#branching">Branching</a></li>
+    <li><a href="#tips">Tips</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">Version Control System</div>
+  <h1>Master<br><em>Git</em></h1>
+  <p class="hero-desc">The distributed version control system that powers modern software development. Track changes, collaborate fearlessly, and never lose your work again.</p>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-num">98%</span>
+      <span class="stat-label">of developers use Git</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">2005</span>
+      <span class="stat-label">Created by Linus Torvalds</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Commits tracked</span>
+    </div>
+  </div>
+
+  <div class="git-graphic">
+    <svg class="commit-graph" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- main branch line -->
+      <line x1="170" y1="310" x2="170" y2="30" stroke="#252a3a" stroke-width="2"/>
+
+      <!-- feature branch -->
+      <path d="M 170 220 Q 240 220 240 170 L 240 120 Q 240 70 170 70" stroke="#252a3a" stroke-width="2" fill="none"/>
+
+      <!-- hotfix branch -->
+      <path d="M 170 260 Q 100 260 100 230 L 100 200 Q 100 170 170 170" stroke="#252a3a" stroke-width="2" fill="none"/>
+
+      <!-- animated lines -->
+      <line x1="170" y1="310" x2="170" y2="30" stroke="#f0a500" stroke-width="2" stroke-dasharray="1000" style="animation: drawLine 2s 1.5s forwards; stroke-dashoffset: 1000;"/>
+      <path d="M 170 220 Q 240 220 240 170 L 240 120 Q 240 70 170 70" stroke="#5ce0b0" stroke-width="2" fill="none" stroke-dasharray="1000" style="animation: drawLine 1.5s 2s forwards; stroke-dashoffset: 1000;"/>
+      <path d="M 170 260 Q 100 260 100 230 L 100 200 Q 100 170 170 170" stroke="#e05c5c" stroke-width="2" fill="none" stroke-dasharray="1000" style="animation: drawLine 1s 2.5s forwards; stroke-dashoffset: 1000;"/>
+
+      <!-- main commits -->
+      <circle cx="170" cy="290" r="8" fill="#0d0f12" stroke="#f0a500" stroke-width="2.5"/>
+      <circle cx="170" cy="240" r="8" fill="#0d0f12" stroke="#f0a500" stroke-width="2.5"/>
+      <circle cx="170" cy="190" r="8" fill="#f0a500" stroke="#f0a500" stroke-width="2.5"/>
+      <circle cx="170" cy="140" r="8" fill="#0d0f12" stroke="#f0a500" stroke-width="2.5"/>
+      <circle cx="170" cy="90" r="8" fill="#0d0f12" stroke="#f0a500" stroke-width="2.5"/>
+      <circle cx="170" cy="50" r="8" fill="#0d0f12" stroke="#f0a500" stroke-width="2.5"/>
+
+      <!-- feature commits -->
+      <circle cx="240" cy="170" r="7" fill="#0d0f12" stroke="#5ce0b0" stroke-width="2.5"/>
+      <circle cx="240" cy="120" r="7" fill="#5ce0b0" stroke="#5ce0b0" stroke-width="2.5"/>
+
+      <!-- hotfix commits -->
+      <circle cx="100" cy="215" r="7" fill="#e05c5c" stroke="#e05c5c" stroke-width="2.5"/>
+
+      <!-- labels -->
+      <text x="185" y="295" fill="#7a8099" font-family="JetBrains Mono" font-size="10">HEAD</text>
+      <text x="256" y="124" fill="#5ce0b0" font-family="JetBrains Mono" font-size="10">feature</text>
+      <text x="48" y="219" fill="#e05c5c" font-family="JetBrains Mono" font-size="10">fix</text>
+      <text x="183" y="45" fill="#f0a500" font-family="JetBrains Mono" font-size="10">main</text>
+    </svg>
+  </div>
+</section>
+
+<!-- WHAT IS GIT -->
+<section class="section" id="concepts">
+  <div class="section-tag">01 — Fundamentals</div>
+  <h2>Core Concepts</h2>
+
+  <div class="concepts-grid animate-in">
+    <div class="concept-card">
+      <div class="concept-icon">📦</div>
+      <h3>Repository</h3>
+      <p>A repository (repo) is the container for your entire project — every file, every change, and the full history of those changes. It lives in a hidden <code>.git</code> folder at your project root.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">📸</div>
+      <h3>Commit</h3>
+      <p>A commit is a snapshot of your project at a specific point in time. Each commit has a unique hash, an author, a timestamp, and a message describing what changed.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🌿</div>
+      <h3>Branch</h3>
+      <p>A branch is a lightweight, movable pointer to a commit. Branches let you diverge from the main codebase to experiment or develop features without affecting the stable version.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔀</div>
+      <h3>Merge</h3>
+      <p>Merging combines the histories of two branches into one. Git intelligently combines changes, and when two branches modify the same lines, it asks you to resolve the conflict manually.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🌍</div>
+      <h3>Remote</h3>
+      <p>A remote is a version of your repository hosted elsewhere — on GitHub, GitLab, or another server. You <code>push</code> your changes to share them and <code>pull</code> to receive others' work.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🎭</div>
+      <h3>Staging Area</h3>
+      <p>The staging area (index) is a preparation zone. You explicitly <code>add</code> files to stage them before committing — giving you precise control over what goes into each snapshot.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔁</div>
+      <h3>Rebase</h3>
+      <p>Rebasing replays your commits on top of another branch, creating a cleaner, linear history. Unlike merge, it rewrites commit history — powerful but best used carefully.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🏷️</div>
+      <h3>Tag</h3>
+      <p>Tags mark specific commits as important — typically release versions like <code>v1.0.0</code>. Unlike branches, tags don't move; they permanently point to one commit.</p>
+    </div>
+    <div class="concept-card">
+      <div class="concept-icon">🔍</div>
+      <h3>HEAD</h3>
+      <p>HEAD is a special pointer that tells Git what you currently have checked out. It typically points to the tip of your current branch — your "you are here" marker in history.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="section" id="workflow">
+  <div class="section-tag">02 — The Process</div>
+  <h2>Git Workflow</h2>
+  <p style="color: var(--text-muted); max-width: 560px; margin-bottom: 2rem;">Files move through distinct areas in Git. Understanding this flow is the foundation of using Git effectively.</p>
+
+  <div class="workflow animate-in">
+    <div class="workflow-step">
+      <div class="step-area">Working Dir</div>
+      <div class="step-name">Modify Files</div>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Edit, create, or delete files in your project folder.</p>
+    </div>
+    <div class="workflow-step">
+      <div class="step-area">Staging Area</div>
+      <div class="step-name">Stage Changes</div>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Select exactly which changes to include.</p>
+      <span class="step-cmd">git add</span>
+    </div>
+    <div class="workflow-step">
+      <div class="step-area">Local Repo</div>
+      <div class="step-name">Commit</div>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Save a permanent snapshot with a message.</p>
+      <span class="step-cmd">git commit</span>
+    </div>
+    <div class="workflow-step">
+      <div class="step-area">Remote Repo</div>
+      <div class="step-name">Push & Share</div>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Upload your commits to the remote for collaboration.</p>
+      <span class="step-cmd">git push</span>
+    </div>
+  </div>
+</section>
+
+<!-- COMMANDS -->
+<section class="commands-section" id="commands">
+  <div class="section-tag">03 — Essential Commands</div>
+  <h2 style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; margin-bottom: 3rem; line-height: 1.1;">The Commands<br><em style="color: var(--accent);">You'll Use Daily</em></h2>
+
+  <!-- Setup -->
+  <div class="cmd-category animate-in">
+    <h3>⚙️ Setup & Init</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git init</div>
+        <div class="cmd-desc">Initialize a new Git repository in the current directory</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git clone &lt;url&gt;</div>
+        <div class="cmd-desc">Clone a remote repository to your local machine</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git config --global user.name "Name"</div>
+        <div class="cmd-desc">Set your global username for commits</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git config --global user.email "email"</div>
+        <div class="cmd-desc">Set your global email address for commits</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staging -->
+  <div class="cmd-category animate-in">
+    <h3>📋 Staging & Committing</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git status</div>
+        <div class="cmd-desc">Show the state of the working directory and staging area</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git add &lt;file&gt;</div>
+        <div class="cmd-desc">Stage a specific file for the next commit</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git add .</div>
+        <div class="cmd-desc">Stage all modified and new files in the current directory</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git commit -m "message"</div>
+        <div class="cmd-desc">Commit staged changes with a descriptive message</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git commit --amend</div>
+        <div class="cmd-desc">Modify the most recent commit (message or content)</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git diff</div>
+        <div class="cmd-desc">Show unstaged changes between working directory and index</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git diff --staged</div>
+        <div class="cmd-desc">Show changes between staged files and the last commit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Branching -->
+  <div class="cmd-category animate-in">
+    <h3>🌿 Branching & Merging</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git branch</div>
+        <div class="cmd-desc">List all local branches (current branch highlighted)</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git branch &lt;name&gt;</div>
+        <div class="cmd-desc">Create a new branch at the current commit</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git checkout &lt;branch&gt;</div>
+        <div class="cmd-desc">Switch to an existing branch</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git checkout -b &lt;branch&gt;</div>
+        <div class="cmd-desc">Create a new branch and switch to it immediately</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git switch -c &lt;branch&gt;</div>
+        <div class="cmd-desc">Modern equivalent of checkout -b: create and switch</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git merge &lt;branch&gt;</div>
+        <div class="cmd-desc">Merge the specified branch into the current branch</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git rebase &lt;branch&gt;</div>
+        <div class="cmd-desc">Reapply commits on top of another branch for a linear history</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git branch -d &lt;branch&gt;</div>
+        <div class="cmd-desc">Delete a branch (safe — won't delete unmerged branches)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remote -->
+  <div class="cmd-category animate-in">
+    <h3>🌍 Remote Operations</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git remote -v</div>
+        <div class="cmd-desc">List all remote connections with their URLs</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git remote add origin &lt;url&gt;</div>
+        <div class="cmd-desc">Add a new remote named "origin"</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git fetch</div>
+        <div class="cmd-desc">Download changes from remote without merging into local</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git pull</div>
+        <div class="cmd-desc">Fetch and immediately merge remote changes into current branch</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git push origin &lt;branch&gt;</div>
+        <div class="cmd-desc">Upload local branch commits to the remote repository</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git push -u origin &lt;branch&gt;</div>
+        <div class="cmd-desc">Push and set upstream tracking for the branch</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History & Inspection -->
+  <div class="cmd-category animate-in">
+    <h3>🔎 History & Inspection</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git log</div>
+        <div class="cmd-desc">Show the full commit history for the current branch</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git log --oneline --graph</div>
+        <div class="cmd-desc">Compact, visual representation of branch and commit history</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git show &lt;hash&gt;</div>
+        <div class="cmd-desc">Display details and diff for a specific commit</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git blame &lt;file&gt;</div>
+        <div class="cmd-desc">Show who last modified each line of a file</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Undoing -->
+  <div class="cmd-category animate-in">
+    <h3>↩️ Undoing & Recovery</h3>
+    <div class="cmd-list">
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git restore &lt;file&gt;</div>
+        <div class="cmd-desc">Discard changes in working directory (unstaged)</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git restore --staged &lt;file&gt;</div>
+        <div class="cmd-desc">Unstage a file without discarding changes</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git revert &lt;hash&gt;</div>
+        <div class="cmd-desc">Create a new commit that undoes a previous commit (safe)</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git reset --soft HEAD~1</div>
+        <div class="cmd-desc">Undo last commit, keeping changes staged</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git reset --hard HEAD~1</div>
+        <div class="cmd-desc">Undo last commit and discard all changes (destructive!)</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git stash</div>
+        <div class="cmd-desc">Temporarily shelve uncommitted changes for later</div>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-code"><span class="prompt">$</span> git stash pop</div>
+        <div class="cmd-desc">Restore the most recently stashed changes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANCHING VISUAL -->
+<section class="branch-section" id="branching">
+  <div class="section-tag">04 — Strategy</div>
+  <h2>Branching Strategy</h2>
+  <p style="color: var(--text-muted); max-width: 560px; margin-bottom: 1rem;">A common workflow separates concerns cleanly across branch types, keeping your main branch always deployable.</p>
+
+  <div class="branch-diagram animate-in">
+    <svg viewBox="0 0 700 260" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;">
+      <!-- main -->
+      <line x1="20" y1="50" x2="680" y2="50" stroke="#f0a500" stroke-width="2.5"/>
+      <text x="20" y="30" fill="#f0a500" font-family="JetBrains Mono" font-size="11" font-weight="600">main</text>
+
+      <!-- develop -->
+      <line x1="100" y1="110" x2="580" y2="110" stroke="#5ce0b0" stroke-width="2"/>
+      <line x1="100" y1="50" x2="100" y2="110" stroke="#5ce0b0" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <line x1="580" y1="50" x2="580" y2="110" stroke="#5ce0b0" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="100" y="98" fill="#5ce0b0" font-family="JetBrains Mono" font-size="11">develop</text>
+
+      <!-- feature branches -->
+      <path d="M 160 110 Q 160 170 200 170 L 320 170 Q 360 170 360 110" stroke="#7a8099" stroke-width="1.5" fill="none"/>
+      <text x="225" y="190" fill="#7a8099" font-family="JetBrains Mono" font-size="10">feature/login</text>
+
+      <path d="M 400 110 Q 400 200 430 200 L 490 200 Q 520 200 520 110" stroke="#7a8099" stroke-width="1.5" fill="none"/>
+      <text x="425" y="220" fill="#7a8099" font-family="JetBrains Mono" font-size="10">feature/api</text>
+
+      <!-- hotfix -->
+      <path d="M 480 50 Q 480 240 510 240 L 550 240 Q 580 240 580 50" stroke="#e05c5c" stroke-width="1.5" fill="none" stroke-dasharray="5,3"/>
+      <text x="493" y="255" fill="#e05c5c" font-family="JetBrains Mono" font-size="10">hotfix</text>
+
+      <!-- commits on main -->
+      <circle cx="50" cy="50" r="6" fill="#0d0f12" stroke="#f0a500" stroke-width="2"/>
+      <circle cx="100" cy="50" r="6" fill="#f0a500" stroke="#f0a500" stroke-width="2"/>
+      <circle cx="580" cy="50" r="6" fill="#f0a500" stroke="#f0a500" stroke-width="2"/>
+      <circle cx="650" cy="50" r="6" fill="#0d0f12" stroke="#f0a500" stroke-width="2"/>
+
+      <!-- commits on develop -->
+      <circle cx="160" cy="110" r="5" fill="#0d0f12" stroke="#5ce0b0" stroke-width="2"/>
+      <circle cx="260" cy="110" r="5" fill="#5ce0b0" stroke="#5ce0b0" stroke-width="2"/>
+      <circle cx="360" cy="110" r="5" fill="#5ce0b0" stroke="#5ce0b0" stroke-width="2"/>
+      <circle cx="460" cy="110" r="5" fill="#0d0f12" stroke="#5ce0b0" stroke-width="2"/>
+
+      <!-- feature commits -->
+      <circle cx="200" cy="170" r="4" fill="#7a8099" stroke="#7a8099" stroke-width="1.5"/>
+      <circle cx="280" cy="170" r="4" fill="#7a8099" stroke="#7a8099" stroke-width="1.5"/>
+      <circle cx="440" cy="200" r="4" fill="#7a8099" stroke="#7a8099" stroke-width="1.5"/>
+
+      <!-- hotfix commits -->
+      <circle cx="510" cy="240" r="4" fill="#e05c5c" stroke="#e05c5c" stroke-width="1.5"/>
+    </svg>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="section" id="tips">
+  <div class="section-tag">05 — Best Practices</div>
+  <h2>Pro Tips</h2>
+
+  <div class="tips-grid animate-in">
+    <div class="tip-card gold">
+      <div class="tip-label">✦ Commit Messages</div>
+      <p>Write commit messages in the imperative mood: <code>Add login feature</code>, not <code>Added login feature</code>. Keep the subject under 72 characters and explain <em>why</em>, not just what.</p>
+    </div>
+    <div class="tip-card green">
+      <div class="tip-label">✦ .gitignore</div>
+      <p>Always create a <code>.gitignore</code> file to exclude build artifacts, <code>node_modules</code>, environment files (<code>.env</code>), and IDE settings. Use gitignore.io to generate one automatically.</p>
+    </div>
+    <div class="tip-card gold">
+      <div class="tip-label">✦ Atomic Commits</div>
+      <p>Each commit should represent a single logical change. Small, focused commits make code review easier, bugs easier to trace with <code>git bisect</code>, and history easier to read.</p>
+    </div>
+    <div class="tip-card red">
+      <div class="tip-label">⚠ Never Rebase Public Branches</div>
+      <p>Rebasing rewrites history. Never rebase commits that have been pushed to a shared remote branch. Use rebase freely on your local feature branches before merging.</p>
+    </div>
+    <div class="tip-card red">
+      <div class="tip-label">⚠ Never Force Push to Main</div>
+      <p><code>git push --force</code> overwrites remote history and can cause teammates to lose work. If you must force push, use <code>--force-with-lease</code> as a safer alternative.</p>
+    </div>
+    <div class="tip-card green">
+      <div class="tip-label">✦ Use Aliases</div>
+      <p>Speed up your workflow: <code>git config --global alias.st status</code>, <code>alias.co checkout</code>, <code>alias.lg "log --oneline --graph --decorate"</code>. Small time savings add up.</p>
+    </div>
+    <div class="tip-card gold">
+      <div class="tip-label">✦ Pull Before Push</div>
+      <p>Always <code>git pull --rebase</code> before pushing to avoid unnecessary merge commits and ensure your changes apply cleanly on top of the latest remote state.</p>
+    </div>
+    <div class="tip-card green">
+      <div class="tip-label">✦ Tag Your Releases</div>
+      <p>Use annotated tags for releases: <code>git tag -a v1.0.0 -m "First stable release"</code>. Push tags explicitly with <code>git push --tags</code>. They serve as permanent milestones.</p>
+    </div>
+    <div class="tip-card red">
+      <div class="tip-label">⚠ Review Before Committing</div>
+      <p>Always run <code>git diff --staged</code> before committing to review exactly what you're including. It's easy to accidentally stage debug code, passwords, or unintended changes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-brand">Git — The Essential Guide</span>
+  <p>Git was created by Linus Torvalds in 2005 · <a href="https://git-scm.com/doc" style="color:var(--accent3); text-decoration:none;">Official Docs ↗</a></p>
+</footer>
+
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // Animate on scroll
+  const animateEls = document.querySelectorAll('.animate-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  animateEls.forEach(el => observer.observe(el));
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelector(anchor.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
